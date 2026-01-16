@@ -1,6 +1,6 @@
-import { getSelectedFinderItems } from "@raycast/api";
+import { Form, getSelectedFinderItems } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ErrorView } from "./components/ErrorView";
+import { ToastError } from "./components/ToastError";
 import { UploadForm } from "./components/UploadForm";
 import { buildBucketOptions, buildDomainOptions } from "./lib/options";
 import { loadPreferences } from "./lib/prefs";
@@ -29,18 +29,22 @@ export default function Command() {
   const domainOptions = buildDomainOptions({ profiles, prefs });
 
   if (!bucketOptions.length) {
-    return <ErrorView title="No buckets configured" message="Add **Bucket Names** or **Bucket Profiles (JSON)**." />;
+    return (
+      <ToastError
+        title="No buckets configured"
+        message="Add Bucket Names or Bucket Profiles (JSON) in Extension Preferences."
+        openPreferences
+      />
+    );
   }
   if (loadError) {
-    return <ErrorView title="Can't read Finder selection" message={loadError} />;
+    return <ToastError title="Can't read Finder selection" message={loadError} />;
   }
   if (!items) {
-    return <ErrorView title="Loading…" message="Reading selected Finder items." />;
+    return <Form isLoading navigationTitle="Upload Selected Files" />;
   }
   if (!items.length) {
-    return (
-      <ErrorView title="No files selected" message="Select one or more files in Finder, then run this command again." />
-    );
+    return <ToastError title="No files selected" message="Select one or more files in Finder, then run again." />;
   }
 
   const sources: UploadSource[] = items.map((it) => ({ kind: "file-path", filePath: it.path }));

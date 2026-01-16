@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { Clipboard, environment } from "@raycast/api";
+import { Clipboard, Form, environment } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { ErrorView } from "./components/ErrorView";
 import { UploadForm } from "./components/UploadForm";
+import { ToastError } from "./components/ToastError";
 import { buildBucketOptions, buildDomainOptions } from "./lib/options";
 import { loadPreferences } from "./lib/prefs";
 import type { UploadSource } from "./lib/upload";
@@ -82,19 +82,25 @@ export default function Command() {
   const domainOptions = buildDomainOptions({ profiles, prefs });
 
   if (!bucketOptions.length) {
-    return <ErrorView title="No buckets configured" message="Add **Bucket Names** or **Bucket Profiles (JSON)**." />;
+    return (
+      <ToastError
+        title="No buckets configured"
+        message="Add Bucket Names or Bucket Profiles (JSON) in Extension Preferences."
+        openPreferences
+      />
+    );
   }
   if (loadError) {
-    return <ErrorView title="Can't read clipboard" message={loadError} />;
+    return <ToastError title="Can't read clipboard" message={loadError} />;
   }
   if (resolved === undefined) {
-    return <ErrorView title="Loading…" message="Reading clipboard…" />;
+    return <Form isLoading navigationTitle="Upload from Clipboard" />;
   }
   if (resolved === null) {
     return (
-      <ErrorView
-        title="No image/video/file in clipboard"
-        message="Copy an image, or copy a file in Finder (e.g. a video), then run this command again."
+      <ToastError
+        title="No image or file in clipboard"
+        message="Copy an image, or copy a file in Finder (e.g. a video), then run again."
       />
     );
   }
