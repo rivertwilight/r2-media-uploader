@@ -65,9 +65,16 @@ export function UploadForm(props: {
 
     const publicBaseUrl = resolvePublicBaseUrl({ prefs, bucket: bucketOpt.bucket, domainValue: values.domainValue });
 
+    const defaultFolder = prefs.defaultFolderTemplate?.trim();
+    const defaultFilename = prefs.defaultFilenameTemplate?.trim();
+
+    const folderFromBucket = bucketOpt.pathPrefix?.trim();
+    const filenameFromBucket = bucketOpt.filenameTemplate?.trim();
+
     const fallbackKeyConfig = {
-      pathPrefix: prefs.defaultFolderTemplate?.trim() || "uploads/{yyyy}/{mm}/{dd}",
-      filenameTemplate: prefs.defaultFilenameTemplate?.trim() || "{name}_{time}.{ext}",
+      // If folder template is blank, upload to bucket root (no prefix)
+      pathPrefix: defaultFolder ? defaultFolder : undefined,
+      filenameTemplate: defaultFilename || "{name}_{time}.{ext}",
     };
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Uploading…" });
@@ -80,8 +87,9 @@ export function UploadForm(props: {
           bucket: bucketOpt.bucket,
           keyConfig: {
             keyTemplate: bucketOpt.keyTemplate,
-            pathPrefix: bucketOpt.pathPrefix || fallbackKeyConfig.pathPrefix,
-            filenameTemplate: bucketOpt.filenameTemplate || fallbackKeyConfig.filenameTemplate,
+            // If explicitly blank, treat as root (undefined)
+            pathPrefix: folderFromBucket ? folderFromBucket : fallbackKeyConfig.pathPrefix,
+            filenameTemplate: filenameFromBucket || fallbackKeyConfig.filenameTemplate,
           },
           publicBaseUrl,
           source: sources[i],
