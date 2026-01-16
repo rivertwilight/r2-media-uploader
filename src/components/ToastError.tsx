@@ -1,4 +1,13 @@
-import { Form, Toast, closeMainWindow, openExtensionPreferences, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  Toast,
+  closeMainWindow,
+  openExtensionPreferences,
+  showToast,
+} from "@raycast/api";
 import { useEffect } from "react";
 
 export function ToastError(props: {
@@ -31,6 +40,19 @@ export function ToastError(props: {
     })();
   }, [props.closeWindow, props.message, props.openPreferences, props.title]);
 
-  // Keep the view lightweight; errors are shown via toast.
-  return <Form navigationTitle={props.title} />;
+  return (
+    <Form
+      navigationTitle={props.title}
+      actions={
+        <ActionPanel>
+          {props.openPreferences ? (
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          ) : null}
+          <Action title="Close" icon={Icon.XmarkCircle} onAction={() => closeMainWindow({ clearRootSearch: true })} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="Error" text={props.message ? `${props.title}\n\n${props.message}` : props.title} />
+    </Form>
+  );
 }
