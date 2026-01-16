@@ -1,8 +1,16 @@
-# R2 Media Uploader
+<div align="center">
 
-![R2 Media Uploader Icon](assets/extension-icon.png)
+<a href="https://www.ygeeker.com">
+  <img width="180" src="assets/extension-icon.png">
+</a>
+
+<h1 align="center">R2 Media Uploader</h1>
+
+[简体中文](./README.zh-CN.md) | **English**
 
 A Raycast extension to upload **files (Finder selection)** or **media from clipboard** to **Cloudflare R2**, then **copy the final URL**.
+
+</div>
 
 ### Features
 

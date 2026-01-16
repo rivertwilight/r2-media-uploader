@@ -1,4 +1,7 @@
-import { Clipboard } from "@raycast/api";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { Clipboard, environment } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { ErrorView } from "./components/ErrorView";
 import { UploadForm } from "./components/UploadForm";
@@ -8,15 +11,45 @@ import type { UploadSource } from "./lib/upload";
 
 type ClipboardResolved = { source: UploadSource; label: string } | null;
 
+async function tryWriteClipboardImageToSupportFile(): Promise<string | null> {
+  if (process.platform !== "darwin") return null;
+
+  const outPath = path.join(
+    environment.supportPath,
+    `clipboard-${Date.now()}-${Math.random().toString(16).slice(2)}.png`,
+  );
+  await fs.mkdir(environment.supportPath, { recursive: true });
+
+  const script = `
+on run argv
+  set outPath to item 1 of argv
+  try
+    set imgData to (the clipboard as «class PNGf»)
+  on error
+    return ""
+  end try
+  set outFile to open for access (POSIX file outPath) with write permission
+  try
+    set eof outFile to 0
+    write imgData to outFile
+  end try
+  try
+    close access outFile
+  end try
+  return outPath
+end run
+`;
+
+  const result = (await runAppleScript(script, [outPath])).trim();
+  if (!result) return null;
+  return outPath;
+}
+
 async function readClipboardSource(): Promise<ClipboardResolved> {
-  // Prefer image data if present
-  const image = await Clipboard.readImage();
-  if (image) {
-    const raw = Buffer.from(image, "base64");
-    return {
-      source: { kind: "buffer", buffer: raw, originalFileName: `clipboard-${Date.now()}.png` },
-      label: "clipboard image",
-    };
+  // Prefer image data if present (via AppleScript, for broad Raycast API compatibility)
+  const imagePath = await tryWriteClipboardImageToSupportFile();
+  if (imagePath) {
+    return { source: { kind: "file-path", filePath: imagePath }, label: "clipboard image" };
   }
 
   // Fallback: if clipboard contains a file path (e.g. copied file in Finder), upload that
