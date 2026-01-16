@@ -17,6 +17,7 @@ A Raycast extension to upload **files (Finder selection)** or **media from clipb
 - **Upload selected Finder files**: supports multiple files (uploads sequentially)
 - **Upload from clipboard**: image data or a copied file (great for videos)
 - **Bucket + domain picker**: shown on every upload
+- **Copy format**: copy as **URL**, **Markdown**, or **HTML**
 - **Remembers last choice**: bucket + domain are memoized for the next upload
 - **Auto-copy URL(s)**: copies the final URL(s) to clipboard (newline-separated for multi-file uploads)
 - **Flexible key/filename formatting**: set folder + filename templates (defaults work well)
